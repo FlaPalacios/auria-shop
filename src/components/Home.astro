@@ -1,0 +1,188 @@
+---
+import type { ImageMetadata } from 'astro';
+import Base from '../layouts/Base.astro';
+import Photo from './Photo.astro';
+import ProductCard from './ProductCard.astro';
+import { ui, paths, type Lang } from '../i18n/ui';
+import { products } from '../lib/catalog';
+import { lineKeys, linePhoto } from '../lib/photos';
+import dorado from '../assets/estilo/dorado.webp';
+import teal from '../assets/estilo/chompa-teal.webp';
+import amigas from '../assets/estilo/amigas.webp';
+import topCrochet from '../assets/estilo/top-crochet.webp';
+import girasolCrudo from '../assets/estilo/cardigan-girasol.webp';
+import girasolVerde from '../assets/estilo/girasol-verde.webp';
+import margaritas from '../assets/estilo/margaritas.webp';
+
+const { lang } = Astro.props as { lang: Lang };
+const t = ui[lang];
+const p = paths[lang];
+const featured = products.filter((x) => x.destacado === 'SI');
+// Tres collages de 3 a 5 fotos; cada uno define su grilla en el CSS (.c1, .c2, .c3).
+const collages: ImageMetadata[][] = [
+  [dorado, teal, girasolCrudo, topCrochet],
+  [amigas, margaritas, girasolVerde, topCrochet, teal],
+  [margaritas, girasolVerde, dorado],
+];
+---
+<Base lang={lang} page="home">
+  <section class="hero">
+    <div class="stage">
+      <div class="slides" id="slides" role="group" aria-label={t.hero.label}>
+        {collages.map((imgs, i) => (
+          <div class={`collage c${i + 1}`} aria-hidden={i > 0 ? 'true' : undefined}>
+            {imgs.map((src, j) => (
+              <Photo src={src} alt="" class={`p${j + 1}`} widths={[400, 800]} sizes="(min-width: 52rem) 30vw, 50vw" loading={i === 0 ? 'eager' : 'lazy'} fetchpriority={i === 0 && j === 0 ? 'high' : undefined} />
+            ))}
+            <p class="tag">{t.hero.collages[i]}</p>
+          </div>
+        ))}
+      </div>
+      <button class="pause" type="button" id="pause" aria-pressed="false" data-play={t.hero.play} data-pause={t.hero.pause}>{t.hero.pause}</button>
+    </div>
+    <div class="wrap">
+      <div class="card rise">
+        <p class="num">{t.hero.kicker}</p>
+        <h1>{t.hero.title}</h1>
+        <p>{t.hero.text}</p>
+        <div class="actions">
+          <a class="btn" href={p.collection}>{t.hero.cta}</a>
+          <a class="btn ghost" href={p.catalog}>{t.hero.catalog}</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap lines">
+    <h2 class="sec-title">{t.lines.title}</h2>
+    <ul>
+      {lineKeys.map((key, i) => (
+        <li>
+          <a class="zoom" href={`${p.collection}#${key}`}>
+            <Photo src={linePhoto[key]} alt={t.alt[key]} widths={[300, 600]} sizes="(min-width: 52rem) 18vw, 50vw" />
+            <span class="label">
+              <span class="name">{t.lines.items[i]}</span>
+              <span class="btn">{t.lines.more}</span>
+            </span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <section class="on-smoke">
+    <div class="wrap featured">
+      <h2 class="sec-title">{t.featured.title}</h2>
+      <ul tabindex="0" aria-label={t.featured.label}>
+        {featured.map((x) => <li><ProductCard lang={lang} product={x} /></li>)}
+      </ul>
+    </div>
+  </section>
+
+  <section class="wrap story">
+    <span class="zoom"><Photo src={null} alt="" widths={[600, 1080]} sizes="(min-width: 52rem) 50vw, 100vw" /></span>
+    <div>
+      <h2>{t.story.title}</h2>
+      <p>{t.story.text}</p>
+      <dl>
+        {t.values.map((v) => (<div><dt>{v.title}</dt><dd>{v.text}</dd></div>))}
+      </dl>
+      <a class="btn" href={p.story}>{t.story.cta}</a>
+    </div>
+  </section>
+
+  <section class="wrap seals">
+    <hr class="stitch" />
+    <h2><a href={p.recognition}>{t.seals.title}</a></h2>
+    <ul>{t.seals.items.map((s) => <li>{s}</li>)}</ul>
+  </section>
+</Base>
+
+<script>
+  // Pausa del carrusel (WCAG 2.2.2). Las animaciones son CSS; aquí solo se detienen o reanudan.
+  const btn = document.getElementById('pause') as HTMLButtonElement;
+  const slides = document.getElementById('slides')!;
+  btn.addEventListener('click', () => {
+    const paused = slides.classList.toggle('paused');
+    btn.setAttribute('aria-pressed', String(paused));
+    btn.textContent = paused ? btn.dataset.play! : btn.dataset.pause!;
+  });
+</script>
+
+<style>
+  section { padding-block: clamp(2.5rem, 7vw, 5.5rem); }
+  img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  /* Hero: franja negra a todo el ancho con collages que se funden; tarjeta humo con sombra encima */
+  .hero { padding: 0 0 clamp(2rem, 5vw, 3.5rem); }
+  .stage { position: relative; background: #050505; padding: clamp(1rem, 3vw, 2.5rem) var(--gutter) clamp(4.5rem, 9vw, 7rem); }
+  .slides { position: relative; max-width: 72rem; margin-inline: auto; aspect-ratio: 4 / 5; }
+  .collage { position: absolute; inset: 0; display: grid; gap: 6px; padding: 6px; background: var(--color-smoke); opacity: 0; }
+  .collage:first-child { opacity: 1; }
+  .collage img { object-position: 50% 30%; min-width: 0; min-height: 0; }
+  .tag { position: absolute; left: 6%; top: 7%; z-index: 1; max-width: 60%; margin: 0; padding: 0.35rem 0.9rem 0.45rem; background: rgb(232 232 230 / 0.92); color: var(--color-ink); font-family: var(--font-title); font-size: clamp(1.4rem, 1rem + 2.2vw, 3rem); line-height: 1.05; }
+
+  /* Móvil: las tres primeras fotos */
+  .collage { grid-template: 'p1 p2' minmax(0, 1fr) 'p1 p3' minmax(0, 1fr) / 1.15fr 1fr; }
+  .p1 { grid-area: p1; } .p2 { grid-area: p2; } .p3 { grid-area: p3; } .p4 { grid-area: p4; } .p5 { grid-area: p5; }
+  .collage .p4, .collage .p5 { display: none; }
+
+  .pause { position: absolute; right: var(--gutter); bottom: clamp(1.2rem, 3vw, 2rem); font: inherit; font-size: 0.85rem; color: var(--color-white); background: transparent; border: 1px solid rgb(250 248 245 / 0.3); padding: 0.25rem 0.8rem; cursor: pointer; transition: background-color 0.25s; }
+  .pause:hover { background: rgb(250 248 245 / 0.1); }
+
+  .card { position: relative; z-index: 1; max-width: 50rem; margin: clamp(-3.5rem, -6vw, -2.5rem) auto 0; background: var(--color-smoke); box-shadow: 0 28px 50px -30px rgb(5 5 5 / 0.55), 0 6px 14px -10px rgb(5 5 5 / 0.25); padding: clamp(1.5rem, 4vw, 2.75rem) clamp(1.25rem, 4vw, 3rem); display: grid; gap: 0.9rem; justify-items: center; text-align: center; }
+  .card p { max-width: 32rem; }
+  .actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.75rem; margin-top: 0.4rem; }
+
+  /* Fundido entre collages (21 s, 7 s cada uno) y un acercamiento lento de las fotos */
+  @media (prefers-reduced-motion: no-preference) {
+    .collage { animation: xfade 21s infinite; }
+    .collage:first-child { opacity: 0; }
+    .c2 { animation-delay: 7s; }
+    .c3 { animation-delay: 14s; }
+    .collage img { animation: drift 21s infinite linear; animation-delay: inherit; }
+    .paused .collage, .paused .collage img { animation-play-state: paused; }
+    @keyframes xfade { 0% { opacity: 0; } 6% { opacity: 1; } 33.3% { opacity: 1; } 40% { opacity: 0; } 100% { opacity: 0; } }
+    @keyframes drift { from { transform: scale(1); } 40% { transform: scale(1.06); } to { transform: scale(1.06); } }
+  }
+  @media (prefers-reduced-motion: reduce) { .pause { display: none; } }
+
+  .lines { display: grid; gap: 2rem; }
+  .lines ul { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
+  .lines li:first-child { grid-column: 1 / -1; }
+  .lines li:first-child img { aspect-ratio: 4 / 3; }
+  .lines a { position: relative; color: var(--color-white); text-decoration: none; }
+  .lines img { aspect-ratio: 3 / 4; }
+  .label { position: absolute; inset: auto 0 0; display: grid; justify-items: center; gap: 0.5rem; padding: 3rem 0.5rem 1rem; text-align: center; background: linear-gradient(transparent, rgb(5 5 5 / 0.6)); }
+  .label .name { font-family: var(--font-title); font-size: var(--step-1); }
+  .label .btn { padding: 0.3rem 1rem; font-size: 0.85rem; }
+
+  .featured { display: grid; gap: 2rem; }
+  .featured ul { list-style: none; margin: 0; padding: 0 0 0.5rem; display: grid; grid-auto-flow: column; grid-auto-columns: 70%; gap: 1rem; overflow-x: auto; scroll-snap-type: x mandatory; }
+  .featured li { scroll-snap-align: start; }
+
+  .story { display: grid; gap: 2rem; align-items: center; }
+  .story img { aspect-ratio: 3 / 2; }
+  .story div { display: grid; gap: 1.25rem; justify-items: start; }
+  dl { margin: 0; display: grid; gap: 0.9rem; }
+  dt { font-family: var(--font-title); font-size: 1.15rem; color: var(--color-ink); }
+  dd { margin: 0; }
+
+  .seals { display: grid; gap: 1.25rem; padding-top: 0; }
+  .seals h2 a { text-decoration: none; }
+  .seals ul { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 0.5rem 2rem; }
+
+  @media (min-width: 52rem) {
+    .slides { aspect-ratio: 16 / 7.5; }
+    .c1 { grid-template: 'p1 p2 p3' minmax(0, 1fr) 'p1 p2 p4' minmax(0, 1fr) / 1fr 1.35fr 0.9fr; }
+    .c2 { grid-template: 'p1 p1 p3 p4' minmax(0, 1fr) 'p2 p2 p3 p5' minmax(0, 1fr) / 1fr 0.7fr 1fr 0.9fr; }
+    .c3 { grid-template: 'p1 p2 p3' minmax(0, 1fr) / 1.3fr 1fr 1fr; }
+    .collage .p4, .collage .p5 { display: block; }
+    .lines ul { grid-template-columns: repeat(5, 1fr); }
+    .lines li:first-child { grid-column: auto; }
+    .lines li:first-child img { aspect-ratio: 3 / 4; }
+    .label .name { font-size: 1.35rem; }
+    .featured ul { grid-auto-flow: row; grid-template-columns: repeat(4, 1fr); overflow: visible; }
+    .story { grid-template-columns: 1.2fr 1fr; gap: 4rem; }
+  }
+</style>

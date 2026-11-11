@@ -1,0 +1,7 @@
+node_modules
+dist
+.astro
+.env
+# Material de la clienta (cuestionario, PDF original, notas, brief): solo local, el repo es público
+assets-fv/
+.claude/settings.local.json

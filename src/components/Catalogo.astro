@@ -1,0 +1,81 @@
+---
+// Visor del catálogo PDF: páginas como imágenes (se ven en cualquier celular) + acciones.
+// Las páginas salen de assets-fv/Catalogo AURIA - EDITH FRANCO.pdf (renderizadas a webp); el PDF comprimido vive en public/catalogo/.
+import type { ImageMetadata } from 'astro';
+import Base from '../layouts/Base.astro';
+import Photo from './Photo.astro';
+import { ui, paths, type Lang } from '../i18n/ui';
+
+const { lang } = Astro.props as { lang: Lang };
+const t = ui[lang];
+const c = t.catalog;
+const pages = Object.entries(import.meta.glob<{ default: ImageMetadata }>('../assets/catalogo/*.webp', { eager: true }))
+  .sort(([a], [b]) => a.localeCompare(b))
+  .map(([, m]) => m.default);
+const pdf = '/catalogo/auria-catalogo.pdf';
+---
+<Base lang={lang} page="catalog" title={c.title} bare>
+  <header class="top">
+    <a class="id" href={paths[lang].home}>
+      <img src="/brand/logo-auria-blanco.svg" alt="Auria" width="72" height="40" />
+      <span><strong>{c.heading}</strong><small>{c.sub}</small></span>
+    </a>
+    <div class="actions">
+      <a class="act" href={pdf} download="Catalogo-Auria.pdf">↓ {c.download}</a>
+      <a class="act" id="share" href="https://wa.me/" target="_blank" rel="noopener noreferrer" data-text={c.share}>
+        <img src="/img/whatsapp.png" alt="" width="16" height="16" /> {c.share}
+      </a>
+      <button class="act" id="copy" type="button" data-done={c.copied}>⧉ {c.copy}</button>
+      <a class="shop" href={paths[lang].home}>{c.shop}</a>
+    </div>
+  </header>
+  <p class="note">{c.note}</p>
+  <p class="sr" role="status" id="copy-status"></p>
+  <div class="pages">
+    {pages.map((src, i) => (
+      <Photo src={src} alt={`${c.page} ${i + 1}`} widths={[600, 1100]} sizes="(min-width: 52rem) 780px, 100vw" loading={i < 2 ? 'eager' : 'lazy'} />
+    ))}
+  </div>
+</Base>
+
+<script>
+  const url = location.origin + location.pathname;
+  const share = document.getElementById('share') as HTMLAnchorElement;
+  share.href = `https://wa.me/?text=${encodeURIComponent(`${share.dataset.text} ${url}`)}`;
+  const copy = document.getElementById('copy') as HTMLButtonElement;
+  copy.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(url);
+      document.getElementById('copy-status')!.textContent = copy.dataset.done!;
+      const label = copy.textContent;
+      copy.textContent = `✓ ${copy.dataset.done}`;
+      setTimeout(() => (copy.textContent = label), 2000);
+    } catch {
+      prompt('', url); // navegador sin permiso de portapapeles: deja copiar a mano
+    }
+  });
+</script>
+
+<style>
+  :global(body) { background: #1c1b1b; color: var(--color-white); }
+  .top { position: sticky; top: 0; z-index: 1; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.75rem 1.5rem; padding: 0.75rem var(--gutter); background: var(--color-ink-soft); border-bottom: 1px solid rgb(250 248 245 / 0.12); }
+  .id { display: flex; align-items: center; gap: 0.9rem; text-decoration: none; }
+  .id img { width: 64px; height: auto; }
+  .id span { display: grid; line-height: 1.25; }
+  .id strong { font-family: var(--font-title); font-weight: 400; font-size: 1.1rem; }
+  .id small { font-size: 0.85rem; opacity: 0.75; }
+  .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.25rem 0.5rem; }
+  .act { display: inline-flex; align-items: center; gap: 0.4rem; font: inherit; font-size: 0.95rem; color: inherit; background: none; border: 0; padding: 0.45rem 0.7rem; text-decoration: none; cursor: pointer; transition: background-color 0.2s; }
+  .act:hover { background: rgb(250 248 245 / 0.1); }
+  .shop { background: var(--color-white); color: var(--color-ink); padding: 0.5rem 1.2rem; text-decoration: none; margin-left: 0.25rem; transition: background-color 0.2s; }
+  .shop:hover { background: #e9e5df; }
+  .note { margin: 1.25rem auto; text-align: center; font-size: 0.95rem; opacity: 0.8; padding-inline: var(--gutter); }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .pages { display: grid; gap: 1rem; max-width: 780px; margin: 0 auto 3rem; padding-inline: clamp(0rem, 3vw, 1rem); }
+  .pages img { width: 100%; height: auto; aspect-ratio: 595 / 842; object-fit: cover; display: block; background: #2a2929; }
+  @media (max-width: 40rem) {
+    .actions { width: 100%; justify-content: space-between; }
+    .act { padding: 0.4rem 0.3rem; font-size: 0.85rem; }
+  }
+  :global(:focus-visible) { outline-color: var(--color-white); }
+</style>

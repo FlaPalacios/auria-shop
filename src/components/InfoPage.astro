@@ -1,0 +1,39 @@
+---
+// Plantilla de Historia, Baby alpaca y Reconocimientos: cabecera + bloques foto/texto alternados.
+import type { ImageMetadata } from 'astro';
+import Base from '../layouts/Base.astro';
+import Photo from './Photo.astro';
+import type { Lang, Page } from '../i18n/ui';
+
+type Block = { title: string; text: string; link?: string; href?: string; photo?: ImageMetadata | null; alt?: string };
+const { lang, page, title, lead, blocks } = Astro.props as { lang: Lang; page: Page; title: string; lead: string; blocks: Block[] };
+---
+<Base lang={lang} page={page} title={title}>
+  <header class="wrap page-head">
+    <h1>{title}</h1>
+    <p>{lead}</p>
+  </header>
+  {blocks.map((b, i) => (
+    <section class={i % 2 ? 'on-smoke' : ''}>
+      <div class={`wrap block ${i % 2 ? 'flip' : ''}`}>
+        <span class="zoom"><Photo src={b.photo} alt={b.alt ?? ''} widths={[500, 1000]} sizes="(min-width: 52rem) 45vw, 100vw" /></span>
+        <div>
+          <h2>{b.title}</h2>
+          <p>{b.text}</p>
+          {b.href && <a href={b.href} target="_blank" rel="noopener noreferrer">{b.link}</a>}
+        </div>
+      </div>
+    </section>
+  ))}
+</Base>
+
+<style>
+  section { padding-block: clamp(2rem, 5vw, 4rem); }
+  .block { display: grid; gap: 1.5rem; align-items: center; }
+  .block img { width: 100%; aspect-ratio: 3 / 2; object-fit: cover; display: block; }
+  .block > div { display: grid; gap: 0.75rem; justify-items: start; }
+  @media (min-width: 52rem) {
+    .block { grid-template-columns: 1fr 1fr; gap: 4rem; }
+    .flip .zoom { order: 2; }
+  }
+</style>

@@ -1,0 +1,102 @@
+:root {
+  --color-bg: #e3dfd8;      /* Hueso: fondo general */
+  --color-smoke: #e8e8e6;   /* Humo: apartados y tarjetas (menos que el hueso) */
+  --color-accent: #d67f56;  /* Pomelo: solo botones */
+  --color-ink-soft: #212121;
+  --color-white: #faf8f5;   /* provisional, texto sobre oscuro */
+  --color-ink: #050505;     /* Títulos */
+  --color-text: #383838;    /* Textos y descripciones */
+  --line: rgb(5 5 5 / 0.14);
+
+  --font-title: 'Kurale', Georgia, serif;
+  --font-text: 'Amiri', Georgia, serif;
+
+  --step--1: 0.95rem;
+  --step-0: clamp(1.125rem, 1.05rem + 0.4vw, 1.3rem);
+  --step-1: clamp(1.4rem, 1.2rem + 1vw, 1.9rem);
+  --step-2: clamp(2rem, 1.5rem + 2.5vw, 3.4rem);
+  --gutter: clamp(1.25rem, 5vw, 4rem);
+  --measure: 38rem;
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font: var(--step-0) / 1.65 var(--font-text);
+}
+
+h1, h2, h3 { font-family: var(--font-title); font-weight: 400; line-height: 1.15; margin: 0; color: var(--color-ink); }
+h1 { font-size: var(--step-2); }
+h2 { font-size: var(--step-1); }
+p { margin: 0; max-width: var(--measure); }
+a { color: inherit; }
+img { max-width: 100%; height: auto; display: block; }
+
+:focus-visible { outline: 2px solid var(--color-ink); outline-offset: 3px; }
+
+.wrap { padding-inline: var(--gutter); max-width: 80rem; margin-inline: auto; }
+
+/* Botones: borde ligero; al pasar, el mismo color un tono más profundo y una leve elevación */
+.btn {
+  display: inline-block;
+  background: var(--color-accent);
+  color: var(--color-ink);
+  border: 1px solid rgb(5 5 5 / 0.2);
+  padding: 0.7rem 1.6rem;
+  font: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.25s, transform 0.25s var(--ease), box-shadow 0.25s;
+}
+.btn:hover { background: #c8714b; transform: translateY(-1px); box-shadow: 0 8px 18px -12px rgb(5 5 5 / 0.55); }
+.btn:active { transform: translateY(0); box-shadow: none; }
+.btn.dark { background: var(--color-ink-soft); color: var(--color-white); border-color: rgb(250 248 245 / 0.18); }
+.btn.dark:hover { background: #3b3a3a; }
+.btn.ghost { background: transparent; border-color: rgb(5 5 5 / 0.35); }
+.btn.ghost:hover { background: rgb(33 33 33 / 0.06); }
+
+/* Humo para separar apartados (usar menos que el hueso) */
+.on-smoke { background: var(--color-smoke); }
+
+/* Zoom sutil al pasar sobre una imagen: el contenedor recorta */
+.zoom { overflow: hidden; display: block; }
+.zoom img { transition: transform 0.8s var(--ease); }
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .zoom:hover img, a:hover .zoom img { transform: scale(1.045); }
+}
+
+/* Cabecera de páginas internas */
+.page-head { display: grid; gap: 0.9rem; justify-items: center; text-align: center; padding-block: clamp(2.5rem, 6vw, 4.5rem) clamp(1.5rem, 4vw, 2.5rem); }
+.page-head p { max-width: 36rem; }
+
+/* Motivo del punto de tejido: separador */
+.stitch {
+  height: 6px;
+  border: 0;
+  margin: 0;
+  background: repeating-linear-gradient(90deg, var(--color-ink-soft) 0 10px, transparent 10px 16px);
+  opacity: 0.35;
+}
+.num { font-family: var(--font-title); font-size: var(--step--1); letter-spacing: 0.08em; color: var(--color-ink); }
+
+/* Título de sección centrado con el punto de tejido debajo */
+.sec-title { display: grid; justify-items: center; gap: 0.75rem; text-align: center; letter-spacing: 0.02em; }
+.sec-title::after { content: ''; width: 5.5rem; height: 5px; background: repeating-linear-gradient(90deg, currentColor 0 10px, transparent 10px 16px); opacity: 0.45; }
+
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .rise { animation: rise 1s var(--ease) both; }
+  @keyframes rise { from { opacity: 0; transform: translateY(14px); } }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { transition-duration: 0.01ms !important; }
+}

@@ -1,0 +1,65 @@
+---
+import Base from '../layouts/Base.astro';
+import Photo from './Photo.astro';
+import { ui, type Lang } from '../i18n/ui';
+import { WA_NUMBER } from '../lib/whatsapp';
+import cardigan from '../assets/estilo/cardigan-girasol.webp';
+
+const { lang } = Astro.props as { lang: Lang };
+const t = ui[lang];
+const f = t.custom.form;
+const fields = [['piece', f.piece], ['size', f.size], ['color', f.color], ['date', f.date]] as const;
+---
+<Base lang={lang} page="custom" title={t.custom.title}>
+  <header class="wrap page-head">
+    <h1>{t.custom.title}</h1>
+    <p>{t.custom.intro}</p>
+  </header>
+  <section class="wrap steps">
+    <ol>
+      {t.custom.steps.map((s, i) => (
+        <li><span class="num">{String(i + 1).padStart(2, '0')}</span><h2>{s.title}</h2><p>{s.text}</p></li>
+      ))}
+    </ol>
+  </section>
+  <section class="on-smoke">
+    <div class="wrap order">
+      <span class="zoom"><Photo src={cardigan} alt={t.alt.cardigans} widths={[400, 800]} sizes="(min-width: 52rem) 40vw, 100vw" /></span>
+      <form id="custom" data-wa={WA_NUMBER} data-msg={f.msg}>
+        <h2>{f.title}</h2>
+        {fields.map(([name, label]) => <label>{label}<input name={name} data-label={label} /></label>)}
+        <label>{f.notes}<textarea name="notes" rows="3" data-label={f.notes}></textarea></label>
+        <button class="btn" type="submit">{f.send}</button>
+      </form>
+    </div>
+  </section>
+</Base>
+
+<script>
+  const form = document.getElementById('custom') as HTMLFormElement;
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const lines = [...form.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('[data-label]')]
+      .filter((el) => el.value.trim())
+      .map((el) => `${el.dataset.label}: ${el.value.trim()}`);
+    const text = [form.dataset.msg, '', ...lines].join('\n');
+    window.open(`https://wa.me/${form.dataset.wa}?text=${encodeURIComponent(text)}`, '_blank', 'noopener');
+  });
+</script>
+
+<style>
+  .steps { padding-bottom: clamp(2.5rem, 6vw, 4rem); }
+  .steps ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 1.75rem; }
+  .steps li { display: grid; gap: 0.4rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+  .on-smoke { padding-block: clamp(2.5rem, 6vw, 4.5rem); }
+  .order { display: grid; gap: 2rem; align-items: start; }
+  .order img { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; display: block; }
+  form { display: grid; gap: 1rem; justify-items: start; }
+  label { display: grid; gap: 0.3rem; width: 100%; }
+  input, textarea { font: inherit; padding: 0.45rem 0.6rem; border: 1px solid var(--line); background: var(--color-bg); width: 100%; transition: border-color 0.2s; }
+  input:focus, textarea:focus { border-color: var(--color-ink); outline: none; }
+  @media (min-width: 52rem) {
+    .steps ol { grid-template-columns: repeat(3, 1fr); gap: 2.5rem; }
+    .order { grid-template-columns: 1fr 1.1fr; gap: 4rem; }
+  }
+</style>

@@ -1,0 +1,102 @@
+---
+import Base from '../layouts/Base.astro';
+import { ui, paths, type Lang } from '../i18n/ui';
+import { products } from '../lib/catalog';
+import { productPhoto } from '../lib/photos';
+
+const { lang } = Astro.props as { lang: Lang };
+const t = ui[lang];
+const p = paths[lang];
+const photo = (x: Record<string, string>) => productPhoto(x) ?? '';
+// Solo lo visible: lo que ya no está en el catálogo se quita en silencio al cargar.
+const data = {
+  wa: t.wa,
+  remove: t.list.remove,
+  products: Object.fromEntries(products.map((x) => [x.id, { name: lang === 'es' ? x.nombre_es : x.nombre_en, precio: Number(x.precio_soles) || 0, url: `${p.collection}/${x.slug}`, img: photo(x) }])),
+};
+const json = JSON.stringify(data).replace(/</g, '\\u003c');
+---
+<Base lang={lang} page="list" title={t.list.title}>
+  <header class="wrap page-head">
+    <h1>{t.list.title}</h1>
+    <p>{t.list.intro}</p>
+  </header>
+  <section class="wrap box">
+    <ul id="items"></ul>
+    <div id="empty" hidden>
+      <p>{t.list.empty}</p>
+      <a class="btn" href={p.collection}>{t.list.browse}</a>
+    </div>
+    <div id="summary" hidden>
+      <p class="total">{t.list.total}: <strong id="total"></strong></p>
+      <a id="send" class="btn" target="_blank" rel="noopener noreferrer">{t.list.send}</a>
+      <p class="note">{t.list.note}</p>
+    </div>
+  </section>
+  <script type="application/json" id="list-data" set:html={json} />
+</Base>
+
+<script>
+  import { readList, writeList, type Item } from '../lib/list';
+  import { listMessage, waLink } from '../lib/whatsapp';
+
+  type P = { name: string; precio: number; url: string; img: string };
+  const data = JSON.parse(document.getElementById('list-data')!.textContent!) as { wa: Parameters<typeof listMessage>[0]; remove: string; products: Record<string, P> };
+  const ul = document.getElementById('items')!;
+
+  function render() {
+    const list = readList().filter((x) => data.products[x.id]);
+    writeList(list);
+    ul.replaceChildren(...list.map((x, i) => row(x, i, list)));
+    document.getElementById('empty')!.hidden = list.length > 0;
+    document.getElementById('summary')!.hidden = list.length === 0;
+    const lines = list.map((x) => ({ ...x, name: data.products[x.id].name, precio: data.products[x.id].precio }));
+    document.getElementById('total')!.textContent = `S/ ${lines.reduce((s, x) => s + x.precio * x.cantidad, 0)}`;
+    (document.getElementById('send') as HTMLAnchorElement).href = waLink(listMessage(data.wa, lines));
+  }
+
+  // Todo con textContent: nunca innerHTML con datos de la hoja o del navegador.
+  function row(x: Item, i: number, list: Item[]) {
+    const prod = data.products[x.id];
+    const li = document.createElement('li');
+    const img = document.createElement('img');
+    img.alt = '';
+    img.width = 120; img.height = 150;
+    if (prod.img) img.src = prod.img; else { img.src = '/img/placeholder.svg'; img.setAttribute('data-fallback', ''); }
+    const info = document.createElement('div');
+    const a = document.createElement('a');
+    a.href = prod.url; a.textContent = prod.name;
+    const meta = document.createElement('p');
+    meta.textContent = [x.color && `${data.wa.color}: ${x.color}`, x.talla && `${data.wa.size}: ${x.talla}`].filter(Boolean).join(' · ');
+    const qty = document.createElement('input');
+    qty.type = 'number'; qty.min = '1'; qty.max = '20'; qty.value = String(x.cantidad);
+    qty.setAttribute('aria-label', `${data.wa.qty} ${prod.name}`);
+    qty.addEventListener('change', () => { list[i].cantidad = Number(qty.value) || 1; writeList(list); render(); });
+    const price = document.createElement('p');
+    price.textContent = `S/ ${prod.precio * x.cantidad}`;
+    const rm = document.createElement('button');
+    rm.type = 'button'; rm.className = 'link'; rm.textContent = data.remove;
+    rm.addEventListener('click', () => { list.splice(i, 1); writeList(list); render(); });
+    info.append(a, meta, qty, price, rm);
+    li.append(img, info);
+    return li;
+  }
+
+  render();
+</script>
+
+<style>
+  .box { display: grid; gap: 1.5rem; max-width: 44rem; padding-bottom: clamp(3rem, 7vw, 5rem); }
+  #items { list-style: none; margin: 0; padding: 0; display: grid; gap: 1rem; }
+  #items :global(li) { display: grid; grid-template-columns: 96px 1fr; gap: 1rem; background: var(--color-smoke); box-shadow: 0 14px 30px -26px rgb(5 5 5 / 0.6); padding: 0.9rem; }
+  #items :global(img) { width: 96px; aspect-ratio: 4 / 5; height: auto; object-fit: cover; }
+  #items :global(div) { display: grid; gap: 0.3rem; justify-items: start; }
+  #items :global(a) { font-family: var(--font-title); font-size: 1.15rem; }
+  #items :global(input) { width: 4.5rem; font: inherit; padding: 0.15rem 0.4rem; border: 1px solid var(--color-ink-soft); background: transparent; }
+  #items :global(.link) { font: inherit; font-size: 0.9rem; background: none; border: 0; padding: 0; text-decoration: underline; cursor: pointer; opacity: 0.75; }
+  #items :global(.link:hover) { opacity: 1; }
+  #empty, #summary { display: grid; gap: 1rem; justify-items: start; }
+  [hidden] { display: none !important; }
+  .total { font-family: var(--font-title); font-size: var(--step-1); }
+  .note { font-size: 0.95rem; opacity: 0.85; }
+</style>

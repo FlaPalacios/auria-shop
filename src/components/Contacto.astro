@@ -1,0 +1,41 @@
+---
+import Base from '../layouts/Base.astro';
+import { ui, contact, type Lang } from '../i18n/ui';
+import { waLink } from '../lib/whatsapp';
+
+const { lang } = Astro.props as { lang: Lang };
+const t = ui[lang];
+const c = t.contactPage;
+const ext = { target: '_blank', rel: 'noopener noreferrer' };
+---
+<Base lang={lang} page="contact" title={c.title}>
+  <header class="wrap page-head">
+    <h1>{c.title}</h1>
+    <p>{c.lead}</p>
+    <a class="btn" href={waLink(t.wa.hello)} {...ext}>{c.write}</a>
+  </header>
+  <section class="on-smoke">
+    <dl class="wrap grid">
+      <div><dt>{c.whatsapp}</dt><dd><a href={waLink(t.wa.hello)} {...ext}>{contact.whatsapp}</a></dd></div>
+      <div><dt>{c.email}</dt><dd><a href={`mailto:${contact.email}`}>{contact.email}</a></dd></div>
+      <div><dt>{c.social}</dt><dd class="social">
+        <a href={contact.instagram} {...ext}>Instagram</a>
+        <a href={contact.facebook} {...ext}>Facebook</a>
+        <a href={contact.tiktok} {...ext}>TikTok</a>
+      </dd></div>
+      <div><dt>{c.workshop}</dt><dd>{c.workshopText}</dd></div>
+      <div><dt>{c.delivery}</dt><dd>{c.deliveryText}</dd></div>
+      <div><dt>{c.pay}</dt><dd>{c.payText}</dd></div>
+    </dl>
+  </section>
+</Base>
+
+<style>
+  .on-smoke { padding-block: clamp(2.5rem, 6vw, 4.5rem); }
+  .grid { margin: 0 auto; display: grid; gap: 1.75rem 2.5rem; }
+  .grid div { border-top: 1px solid var(--line); padding-top: 0.9rem; }
+  dt { font-family: var(--font-title); font-size: 1.15rem; margin-bottom: 0.3rem; color: var(--color-ink); }
+  dd { margin: 0; }
+  .social { display: flex; flex-wrap: wrap; gap: 0.25rem 1.25rem; }
+  @media (min-width: 52rem) { .grid { grid-template-columns: repeat(3, 1fr); } }
+</style>

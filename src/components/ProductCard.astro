@@ -1,0 +1,27 @@
+---
+import Photo from './Photo.astro';
+import { ui, paths, type Lang } from '../i18n/ui';
+import { productPhoto, lineKeys } from '../lib/photos';
+
+const { lang, product: x } = Astro.props as { lang: Lang; product: Record<string, string> };
+const name = lang === 'es' ? x.nombre_es : x.nombre_en;
+const line = ui[lang].lines.items[lineKeys.indexOf(x.linea as (typeof lineKeys)[number])] ?? '';
+---
+<a class="card" href={`${paths[lang].collection}/${x.slug}`}>
+  <span class="zoom"><Photo src={productPhoto(x)} alt={name} widths={[300, 600]} sizes="(min-width: 52rem) 24vw, 70vw" /></span>
+  <span class="meta">
+    <span class="line">{line}</span>
+    <span class="name">{name}</span>
+    <span class="price">S/ {x.precio_soles}</span>
+  </span>
+</a>
+
+<style>
+  .card { display: grid; gap: 0.85rem; text-decoration: none; }
+  img { width: 100%; aspect-ratio: 3 / 4; object-fit: cover; display: block; }
+  .meta { display: grid; grid-template-columns: 1fr auto; column-gap: 1rem; align-items: baseline; }
+  .line { grid-column: 1 / -1; font-size: 0.85rem; color: var(--color-text); opacity: 0.8; }
+  .name { font-family: var(--font-title); font-size: 1.15rem; color: var(--color-ink); line-height: 1.25; transition: color 0.25s; }
+  .price { color: var(--color-ink); white-space: nowrap; }
+  .card:hover .name { text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; }
+</style>

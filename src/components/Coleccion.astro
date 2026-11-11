@@ -1,0 +1,53 @@
+---
+import Base from '../layouts/Base.astro';
+import ProductCard from './ProductCard.astro';
+import { ui, type Lang } from '../i18n/ui';
+import { products } from '../lib/catalog';
+import { lineKeys } from '../lib/photos';
+
+const { lang } = Astro.props as { lang: Lang };
+const t = ui[lang];
+---
+<Base lang={lang} page="collection" title={t.collection.title}>
+  <header class="wrap page-head">
+    <h1>{t.collection.title}</h1>
+    <p>{t.collection.intro}</p>
+  </header>
+  <section class="on-smoke">
+    <div class="wrap col">
+      {/* Filtro sin JS: cada enlace apunta a un ancla y :target + :has esconde el resto. */}
+      {lineKeys.map((k) => <span id={k} class="anchor"></span>)}
+      <nav aria-label={t.collection.filter} class="filters">
+        <a href="#todo" data-all>{t.collection.all}</a>
+        {lineKeys.map((k, i) => <a href={`#${k}`} data-f={k}>{t.lines.items[i]}</a>)}
+      </nav>
+      <ul class="grid">
+        {products.map((x) => <li data-linea={x.linea}><ProductCard lang={lang} product={x} /></li>)}
+      </ul>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .on-smoke { padding-block: 2rem clamp(3rem, 7vw, 5rem); }
+  .anchor { position: absolute; }
+  .col { position: relative; display: grid; gap: 2rem; }
+  .filters { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; }
+  .filters a { text-decoration: none; border: 1px solid rgb(5 5 5 / 0.22); padding: 0.35rem 1.1rem; font-size: 0.95rem; transition: background-color 0.25s, border-color 0.25s; }
+  .filters a:hover { background: rgb(33 33 33 / 0.06); border-color: rgb(5 5 5 / 0.45); }
+  .grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 2.25rem 1rem; }
+
+  .col:not(:has(.anchor:target)) [data-all],
+  .col:has(#ponchos:target) [data-f='ponchos'],
+  .col:has(#chompas:target) [data-f='chompas'],
+  .col:has(#cardigans:target) [data-f='cardigans'],
+  .col:has(#tops:target) [data-f='tops'],
+  .col:has(#accesorios:target) [data-f='accesorios'] { background: var(--color-ink-soft); color: var(--color-white); }
+  .col:has(#ponchos:target) li:not([data-linea='ponchos']),
+  .col:has(#chompas:target) li:not([data-linea='chompas']),
+  .col:has(#cardigans:target) li:not([data-linea='cardigans']),
+  .col:has(#tops:target) li:not([data-linea='tops']),
+  .col:has(#accesorios:target) li:not([data-linea='accesorios']) { display: none; }
+
+  @media (min-width: 52rem) { .grid { grid-template-columns: repeat(4, 1fr); } }
+</style>
