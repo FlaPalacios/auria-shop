@@ -68,7 +68,6 @@ const social = [
         <div class="wrap cols">
           <div class="about">
             <img src="/brand/logo-auria-blanco.svg" alt="Auria" width="130" height="72" />
-            <p>{t.footer.about}</p>
             <ul class="social" aria-label={t.footer.social}>
               {social.map((s) => <li><a href={s.url} {...ext}><img src={s.icon} alt={s.name} width="24" height="24" /></a></li>)}
             </ul>
@@ -95,11 +94,11 @@ const social = [
             <ul>
               <li><a href={waLink(t.wa.hello)} {...ext}>WhatsApp {contact.whatsapp}</a></li>
               <li><a href={`mailto:${contact.email}`}>{contact.email}</a></li>
-              <li>{t.contactPage.workshopText}</li>
+              <li>{t.footer.workshop}</li>
             </ul>
           </div>
         </div>
-        <p class="wrap rights">© {new Date().getFullYear()} {t.footer.rights}</p>
+        <p class="wrap rights">© {new Date().getFullYear()} Auria</p>
       </footer>
     )}
     <script>
