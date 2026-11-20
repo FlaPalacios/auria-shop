@@ -20,7 +20,10 @@
 3. `revisor-seguridad` antes de cada vista previa.
 4. Vista previa en Cloudflare Pages y registro en `FEEDBACK.md`.
 
-## Vista previa en Cloudflare (paso manual de Flavio)
+## Vista previa (funcionando desde el 20 nov 2026)
+**https://auria-shop.flavioalejandro99.workers.dev** · cada push a `main` despliega solo en ~2 min. Ramas: `<rama>-auria-shop.flavioalejandro99.workers.dev`.
+
+## Cómo se montó (referencia por si hay que rehacerlo)
 Se despliega como **Worker con static assets** (no Pages): `wrangler.jsonc` sirve `./dist` y no necesita código de Worker. `public/_headers` se aplica igual que en Pages.
 
 En el panel: Create an app → conectar `FlaPalacios/auria-shop` → nombre `auria-shop`, build `npm run build`, deploy `npx wrangler deploy` → Deploy. El aviso "This Worker does not exist on your account" solo confirma que el nombre está libre.
