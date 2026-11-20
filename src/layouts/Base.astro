@@ -9,6 +9,8 @@ const t = ui[lang];
 const p = paths[lang];
 const other = lang === 'es' ? 'en' : 'es';
 const href = (l: Lang) => paths[l][page] + (slug ? `/${slug}` : '');
+// hreflang y canonical exigen URL absolutas: se arman con el `site` de astro.config.
+const url = (l: Lang) => new URL(href(l), Astro.site).href;
 const ext = { target: '_blank', rel: 'noopener noreferrer' };
 const social = [
   { name: 'Instagram', url: contact.instagram, icon: '/img/instagram.png' },
@@ -25,8 +27,9 @@ const social = [
     <title>{title ? `${title} · Auria` : t.title}</title>
     <meta name="description" content={t.description} />
     <link rel="icon" href="/brand/logo-auria-negro.svg" type="image/svg+xml" />
-    <link rel="alternate" hreflang="es" href={href('es')} />
-    <link rel="alternate" hreflang="en" href={href('en')} />
+    <link rel="canonical" href={url(lang)} />
+    <link rel="alternate" hreflang="es" href={url('es')} />
+    <link rel="alternate" hreflang="en" href={url('en')} />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Kurale&display=swap" rel="stylesheet" />

@@ -20,5 +20,8 @@
 3. `revisor-seguridad` antes de cada vista previa.
 4. Vista previa en Cloudflare Pages y registro en `FEEDBACK.md`.
 
+## Vista previa en Cloudflare Pages (paso manual de Flavio)
+El repo ya está listo (`site`, `canonical`/`hreflang` absolutos, `.node-version`). En el panel de Cloudflare: Workers & Pages → Create → Pages → Connect to Git → `FlaPalacios/auria-shop`. Framework Astro, build `npm run build`, salida `dist`, rama `main`. Cada rama da su propia URL de vista previa para compartir con Edith.
+
 ## Pendientes del cliente
-Color "blanco" real, fuente final, enlaces de Facebook/TikTok, nombre del premio 2026, venta mayorista, taller visitable, dominio y correo, textos en voz de Edith. Instagram: https://www.instagram.com/auria_inspira_vida/
+Color "blanco" real, fuente final (Amiri vs Amiri Quran, decidir con ella), fotos de las 17 prendas, enlaces de Facebook/TikTok, nombre del premio 2026, venta mayorista, taller visitable, dominio y correo, textos e historias en voz de Edith. Instagram: https://www.instagram.com/auria_inspira_vida/
