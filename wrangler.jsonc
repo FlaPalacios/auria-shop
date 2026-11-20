@@ -4,6 +4,8 @@
   "name": "auria-shop",
   "compatibility_date": "2026-11-20",
   "assets": {
-    "directory": "./dist"
+    "directory": "./dist",
+    // Sin esto, /coleccion redirige 307 a /coleccion/ y el canonical apunta a una redireccion.
+    "html_handling": "drop-trailing-slash"
   }
 }
