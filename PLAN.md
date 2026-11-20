@@ -20,8 +20,12 @@
 3. `revisor-seguridad` antes de cada vista previa.
 4. Vista previa en Cloudflare Pages y registro en `FEEDBACK.md`.
 
-## Vista previa en Cloudflare Pages (paso manual de Flavio)
-El repo ya está listo (`site`, `canonical`/`hreflang` absolutos, `.node-version`). En el panel de Cloudflare: Workers & Pages → Create → Pages → Connect to Git → `FlaPalacios/auria-shop`. Framework Astro, build `npm run build`, salida `dist`, rama `main`. Cada rama da su propia URL de vista previa para compartir con Edith.
+## Vista previa en Cloudflare (paso manual de Flavio)
+Se despliega como **Worker con static assets** (no Pages): `wrangler.jsonc` sirve `./dist` y no necesita código de Worker. `public/_headers` se aplica igual que en Pages.
+
+En el panel: Create an app → conectar `FlaPalacios/auria-shop` → nombre `auria-shop`, build `npm run build`, deploy `npx wrangler deploy` → Deploy. El aviso "This Worker does not exist on your account" solo confirma que el nombre está libre.
+
+Al terminar, Cloudflare da una URL `auria-shop.<subdominio>.workers.dev`: hay que ponerla en `site` de `astro.config.mjs`, porque de ahí salen el `canonical` y los `hreflang`. Las ramas distintas de `main` generan vistas previas propias (sección Previews del Worker).
 
 ## Pendientes del cliente
 Color "blanco" real, fuente final (Amiri vs Amiri Quran, decidir con ella), fotos de las 17 prendas, enlaces de Facebook/TikTok, nombre del premio 2026, venta mayorista, taller visitable, dominio y correo, textos e historias en voz de Edith. Instagram: https://www.instagram.com/auria_inspira_vida/

@@ -1,0 +1,9 @@
+{
+  // Sitio estático servido por Workers static assets: sin "main" porque no hay código de Worker.
+  // `public/_headers` llega a dist/ y Cloudflare lo aplica igual que en Pages.
+  "name": "auria-shop",
+  "compatibility_date": "2026-11-20",
+  "assets": {
+    "directory": "./dist"
+  }
+}
